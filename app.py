@@ -2,22 +2,22 @@ import streamlit as st
 import numpy as np
 import cv2
 import tensorflow as tf
-from tensorflow.keras.models import load_model
 from PIL import Image
+import os
+import gdown
 
-model = load_trained_model()
 @st.cache_resource
-def load_model():
+def load_trained_model():
     model_path = "vgg16_plant_disease_model.h5"
-    file_id = "1Kns43o5nbU6RruFtm3TEn-CShKY4QWqT"  # Replace with your real file ID
+    file_id = "1Kns43o5nbU6RruFtm3TEn-CShKY4QWqT"
+    url = f"https://drive.google.com/uc?id={file_id}"
 
     if not os.path.exists(model_path):
-        url = f"https://drive.google.com/uc?id={1Kns43o5nbU6RruFtm3TEn-CShKY4QWqT}"
         gdown.download(url, model_path, quiet=False)
 
     model = tf.keras.models.load_model(model_path)
     return model
-    
+
 model = load_trained_model()
 
 label_dict = {
@@ -29,7 +29,7 @@ label_dict = {
     5: 'Tomato_Leaf_Mold'
 }
 
-st.title("Plant Disease Classifier 🌿")
+st.title("🌿 Plant Disease Classifier")
 st.write("Upload a leaf image to detect plant disease.")
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
@@ -41,6 +41,7 @@ if uploaded_file is not None:
     img = np.array(image)
     if img.shape[-1] == 4:
         img = img[:, :, :3]
+
     img = cv2.resize(img, (150, 150))
     img = img.astype('float32') / 255.0
     img = np.expand_dims(img, axis=0)
@@ -49,5 +50,5 @@ if uploaded_file is not None:
     predicted_class = np.argmax(prediction)
     confidence = np.max(prediction)
 
-    st.markdown(f"### Prediction: {label_dict[predicted_class]}")
-    st.markdown(f"**Confidence:** {confidence:.2f}")
+    st.markdown(f"### 🧪 Prediction: `{label_dict[predicted_class]}`")
+    st.markdown(f"**Confidence:** `{confidence:.2f}`")
