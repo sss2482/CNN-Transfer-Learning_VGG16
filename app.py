@@ -1,38 +1,44 @@
 import streamlit as st
-import tensorflow as tf
 import numpy as np
+import cv2
+import tensorflow as tf
+from tensorflow.keras.models import load_model
 from PIL import Image
 
-st.set_page_config(page_title="Plant Disease Detection (VGG16)", layout="centered")
-st.title("Plant Disease Classification (VGG16 - Transfer Learning)")
-
 @st.cache_resource
-def load_model():
-    return tf.keras.models.load_model("vgg16_plant_disease_model.h5")
+def load_trained_model():
+    return load_model("vgg16_transfer_plant_disease.h5")
 
-model = load_model()
+model = load_trained_model()
 
-class_names = [
-    'Tomato Healthy',
-    'Tomato Bacterial Spot',
-    'Tomato Early Blight',
-    'Tomato Late Blight',
-    'Tomato Leaf Mold',
-    'Tomato Septoria Leaf Spot'
-]
+label_dict = {
+    0: 'Pepper__bell___Bacterial_spot',
+    1: 'Pepper__bell___healthy',
+    2: 'Potato___Early_blight',
+    3: 'Potato___Late_blight',
+    4: 'Tomato_Early_blight',
+    5: 'Tomato_Leaf_Mold'
+}
 
-uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
+st.title("Plant Disease Classifier 🌿")
+st.write("Upload a leaf image to detect plant disease.")
+
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    img = Image.open(uploaded_file).convert("RGB")
-    img_resized = img.resize((150, 150))
-    st.image(img, caption="Uploaded Image", use_column_width=True)
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    img_array = np.array(img_resized) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+    img = np.array(image)
+    if img.shape[-1] == 4:
+        img = img[:, :, :3]
+    img = cv2.resize(img, (150, 150))
+    img = img.astype('float32') / 255.0
+    img = np.expand_dims(img, axis=0)
 
-    with st.spinner("Predicting..."):
-        prediction = model.predict(img_array)
-        predicted_class = class_names[np.argmax(prediction)]
+    prediction = model.predict(img)
+    predicted_class = np.argmax(prediction)
+    confidence = np.max(prediction)
 
-    st.success(f"Predicted Disease: {predicted_class}")
+    st.markdown(f"### Prediction: {label_dict[predicted_class]}")
+    st.markdown(f"**Confidence:** {confidence:.2f}")
