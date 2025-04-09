@@ -4,6 +4,5 @@ pillow
 numpy
 matplotlib
 scikit-learn
-opencv-python
 gdown
 opencv-python-headless
