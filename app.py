@@ -5,10 +5,19 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 from PIL import Image
 
+model = load_trained_model()
 @st.cache_resource
-def load_trained_model():
-    return load_model("vgg16_transfer_plant_disease.h5")
+def load_model():
+    model_path = "vgg16_plant_disease_model.h5"
+    file_id = "1Kns43o5nbU6RruFtm3TEn-CShKY4QWqT"  # Replace with your real file ID
 
+    if not os.path.exists(model_path):
+        url = f"https://drive.google.com/uc?id={1Kns43o5nbU6RruFtm3TEn-CShKY4QWqT}"
+        gdown.download(url, model_path, quiet=False)
+
+    model = tf.keras.models.load_model(model_path)
+    return model
+    
 model = load_trained_model()
 
 label_dict = {
