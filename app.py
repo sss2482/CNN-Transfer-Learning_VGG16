@@ -3,10 +3,15 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 
-# Load the trained model
-model = tf.keras.models.load_model("vgg16_plant_disease_model.h5")
+st.set_page_config(page_title="Plant Disease Detection (VGG16)", layout="centered")
+st.title("Plant Disease Classification (VGG16 - Transfer Learning)")
 
-# Class labels
+@st.cache_resource
+def load_model():
+    return tf.keras.models.load_model("vgg16_plant_disease_model.h5")
+
+model = load_model()
+
 class_names = [
     'Tomato Healthy',
     'Tomato Bacterial Spot',
@@ -16,22 +21,18 @@ class_names = [
     'Tomato Septoria Leaf Spot'
 ]
 
-# Streamlit app UI
-st.title(" Plant Disease Classification (Transfer Learning - VGG16)")
-st.write("Upload a tomato leaf image to detect the disease.")
-
 uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    image = Image.open(uploaded_file).resize((150, 150))
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    img = Image.open(uploaded_file).convert("RGB")
+    img_resized = img.resize((150, 150))
+    st.image(img, caption="Uploaded Image", use_column_width=True)
 
-    # Preprocessing
-    img_array = np.array(image) / 255.0
-    img_array = img_array.reshape((1, 150, 150, 3))
+    img_array = np.array(img_resized) / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
 
-    # Prediction
-    predictions = model.predict(img_array)
-    predicted_class = class_names[np.argmax(predictions)]
+    with st.spinner("Predicting..."):
+        prediction = model.predict(img_array)
+        predicted_class = class_names[np.argmax(prediction)]
 
-    st.success(f"Prediction: {predicted_class}")
+    st.success(f"Predicted Disease: {predicted_class}")
