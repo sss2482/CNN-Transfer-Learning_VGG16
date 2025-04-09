@@ -17,7 +17,7 @@ class_names = [
 ]
 
 # Streamlit app UI
-st.title("🌿 Plant Disease Classification (Transfer Learning - VGG16)")
+st.title(" Plant Disease Classification (Transfer Learning - VGG16)")
 st.write("Upload a tomato leaf image to detect the disease.")
 
 uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
@@ -34,4 +34,4 @@ if uploaded_file is not None:
     predictions = model.predict(img_array)
     predicted_class = class_names[np.argmax(predictions)]
 
-    st.success(f"**Prediction:** {predicted_class}")
+    st.success(f"Prediction: {predicted_class}")
